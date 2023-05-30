@@ -16,6 +16,9 @@ public class WordController implements ChangeListener<String> {
 
     @Override
     public void changed(ObservableValue<? extends String> observableValue, String oldString, String newString) {
+        if (! wordManager.inGame() || wordManager.isPaused()) {
+            return;
+        }
         if (oldString.length() > newString.length()) {
             wordManager.removeCharacter();
             return;
@@ -26,5 +29,9 @@ public class WordController implements ChangeListener<String> {
             return;
         }
         wordManager.addCharacter(c);
+    }
+
+    public void finishTest() {
+        wordManager.finishTest();
     }
 }

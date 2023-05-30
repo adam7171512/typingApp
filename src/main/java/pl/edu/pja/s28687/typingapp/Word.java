@@ -49,7 +49,7 @@ public class Word {
     }
 
     public BigDecimal getWPM(){
-        if (finishTime == 0 || startTime == 0 || finishTime == startTime)
+        if (finishTime == 0 || startTime == 0 || missedChars > 0)
             return BigDecimal.ZERO;
         return BigDecimal.valueOf(60000)
                 .divide(BigDecimal.valueOf(finishTime - startTime), RoundingMode.FLOOR)

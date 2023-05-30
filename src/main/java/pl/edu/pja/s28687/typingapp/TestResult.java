@@ -4,8 +4,13 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class TestResult {
@@ -20,6 +25,7 @@ public class TestResult {
     }
 
     public int getWPM() {
+        if (words.size() == 0) return 0;
         BigDecimal sum = BigDecimal.ZERO;
         for (Word w : words){
             sum = sum.add(w.getWPM());
@@ -75,7 +81,8 @@ public class TestResult {
                 new LineChart<>(xAxis, yAxis);
         XYChart.Series<Number, Number> wpmSeries = new XYChart.Series<>();
         XYChart.Series<Number, Number> avgWpmSeries = new XYChart.Series<>();
-        xAxis.setLabel("Time");
+        yAxis.setLabel("WPM");
+        xAxis.setLabel("Time (s)");
         wpmSeries.setName("WPM");
         avgWpmSeries.setName("Average WPM");
         wpmSeries.getData().add(new XYChart.Data<>(time, 0));
@@ -98,10 +105,24 @@ public class TestResult {
         for (Word w : words) {
             sb
                     .append(w.getSourceWord())
-                    .append(" -> WPM :  ")
+                    .append(" -> ")
                     .append(w.getWPM().intValue())
-                    .append("\n");
+                    .append(" wpm\n");
         }
         return sb.toString();
+    }
+
+    public void saveWpmReport(){
+        String wpmReport = getWordsWPMs();
+        String fileName = "testResult_"
+                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
+                + ".txt";
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, false));
+            writer.write(wpmReport);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

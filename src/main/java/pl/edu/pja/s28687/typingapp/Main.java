@@ -4,6 +4,9 @@ import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -12,20 +15,22 @@ import javafx.util.Duration;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
-        VBox root = new VBox();
-        root.setAlignment(Pos.CENTER);
-
-        String text = "This is not a very lengthy test text.";
 
         WordController wordController = new WordController();
-        TextView textView = new TextView(wordController);
-        WordManager wordManager = new WordManager(textView);
+        TimeController timeController = new TimeController();
+        LanguageController languageController = new LanguageController();
+        HotkeyController hotkeyController = new HotkeyController();
+
+
+        GameView gameView = new GameView(wordController, timeController, languageController, hotkeyController);
+        WordManager wordManager = new WordManager(gameView, gameView.getTextView());
         wordController.setWordManager(wordManager);
-        wordManager.setText(text);
+        timeController.setWordManager(wordManager);
+        hotkeyController.setWordManager(wordManager);
+        wordManager.start();
 
-        root.getChildren().addAll(textView.getFlowPane(), textView.getTextField());
-
-        primaryStage.setScene(new Scene(root, 500, 500));
+        VBox root = gameView.getRoot();
+        primaryStage.setScene(new Scene(root, 1200, 1200));
         primaryStage.show();
     }
 

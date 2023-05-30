@@ -11,10 +11,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -35,10 +32,16 @@ public class TextView {
     private int wordIndex;
     private int charIndex;
     private Iterator<TextFlow> iterator;
+    private boolean waveRunning = false;
+    private boolean inGame = false;
+    private Thread waveThread;
 
     public TextView(WordController wordController) {
         this.flowPane = new FlowPane();
+        this.flowPane.setPrefWidth(800);
+        this.flowPane.setHgap(10);
         this.textField = new TextField();
+        this.textField.setPrefWidth(0);
         this.textField.setOpacity(0);
         this.textField.textProperty().addListener(wordController);
         this.words = new ArrayList<>();
@@ -59,12 +62,11 @@ public class TextView {
 //            delay += 100;
 //        }
 //        iterator = words.iterator();
-        new Thread(new Runnable() {
-
-
+         waveThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                if (iterator.hasNext()) {
+                waveRunning = true;
+                if (inGame && iterator.hasNext()) {
                     TextFlow word = iterator.next();
                     List<Text> chars = word.getChildren().stream().map(n -> (Text) n).toList();
                     ParallelTransition parallelTransition = new ParallelTransition();
@@ -86,12 +88,17 @@ public class TextView {
                         if (!iterator.hasNext()) {
                             iterator = words.iterator();
                         }
-                        playWave();
+                        if (inGame) {
+                            playWave();
+                        }
+                        else {
+                            waveRunning = false;
+                        }
                     });
                 }
-
             }
-        }).start();
+        });
+        waveThread.start();
 
 //        parallelTransition.play();
 //        parallelTransition.setOnFinished(e -> {
@@ -101,17 +108,20 @@ public class TextView {
     }
 
     public void setWords(List<Word> words) {
+        textField.requestFocus();
+        inGame = true;
         if (words.size() != this.words.size()) {
             for (Word w : words) {
                 List<Text> letters = w.getClassifiedChars().stream().map(this::processClassifiedChar).toList();
                 TextFlow textFlow = new TextFlow();
-                textFlow.setStyle("-fx-font-size: 20");
+                textFlow.setStyle("-fx-font-size: 25");
                 textFlow.getChildren().addAll(letters);
                 textFlow.getChildren().add(new Text(" "));
                 this.words.add(textFlow);
             }
             iterator = this.words.iterator();
-            playWave();
+            if (!waveRunning)
+                playWave();
         }
 
         for (int i = 0; i < 2; i++){
@@ -120,7 +130,7 @@ public class TextView {
             Word w = words.get(wIndex);
             List<Text> currentWordChars = w.getClassifiedChars().stream().map(this::processClassifiedChar).toList();
             TextFlow currentWord = new TextFlow();
-            currentWord.setStyle("-fx-font-size: 20");
+            currentWord.setStyle("-fx-font-size: 25");
             currentWord.getChildren().addAll(currentWordChars);
             currentWord.getChildren().add(new Text(" "));
             this.words.set(wIndex, currentWord);
@@ -212,7 +222,18 @@ public class TextView {
         flowPane.getChildren().add(buildChartData);
     }
 
+    public void clear(){
+        inGame = false;
+        flowPane.getChildren().clear();
+        words.clear();
+        textField.clear();
+        wordIndex = 0;
+        charIndex = 0;
+    }
+
     public void testFinished(TestResult testResult) {
+        clear();
+
         int correct = testResult.getCorrectCharacters();
         int incorrect = testResult.getIncorrectCharacters();
         int missed = testResult.getMissedCharacters();
@@ -221,7 +242,18 @@ public class TextView {
         double accuracy = testResult.getAccuracy();
         int wpm = testResult.getWPM();
         LineChart<Number, Number> chart = testResult.buildChart();
+
         flowPane.getChildren().add(chart);
+
+
+        VBox results = new VBox();
+        results.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        results.setAlignment(Pos.CENTER);
+        Text resultText = new Text("Test results");
+        resultText.setStyle("-fx-font-size: 30");
+        results.getChildren().add(resultText);
+
 
         HBox hBox = new HBox();
         hBox.getChildren().add(chart);
@@ -249,8 +281,15 @@ public class TextView {
 
 
         hBox.getChildren().add(tableView);
-        flowPane.getChildren().add(hBox);
+
+        results.getChildren().add(hBox);
+
+        flowPane.getChildren().add(results);
 
         //
+    }
+
+    public void newFeed() {
+        words.clear();
     }
 }
