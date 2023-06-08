@@ -1,10 +1,18 @@
-package pl.edu.pja.s28687.typingapp;
+package pl.edu.pja.s28687.typingapp.model;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class representing single word. It stores information about typed word, source word, stores the
+ * time of typing, keeps track of correct, incorrect, extra and missed characters.
+ * By default, new word is created with all characters classified as missing.
+ * addChar(char c) method is used to add new character to the typed word. It also classifies the character
+ * as correct, incorrect, extra or missed and returns the classification, so the Word Manager can update
+ * the view accordingly.
+ */
 public class Word {
     private final String sourceWord;
     private final List<Character> typedWord = new ArrayList<>();
@@ -16,23 +24,23 @@ public class Word {
     private int extraChars;
     private int missedChars;
 
-    public Word(String sourceWord){
+    public Word(String sourceWord) {
         this.sourceWord = sourceWord;
         prepareChars();
     }
 
-    private void prepareChars(){
-        for (int i = 0; i < sourceWord.length(); i++){
+    private void prepareChars() {
+        for (int i = 0; i < sourceWord.length(); i++) {
             ClassifiedChar classifiedChar = new ClassifiedChar(sourceWord.charAt(i), InputClassification.MISSING_CHAR);
             classifiedChars.add(classifiedChar);
         }
     }
 
-    public void start(){
+    public void start() {
         startTime = System.currentTimeMillis();
     }
 
-    public void complete(){
+    public void complete() {
 
         finishTime = System.currentTimeMillis();
         if (startTime == 0) {
@@ -40,15 +48,13 @@ public class Word {
         }
 
         List<ClassifiedChar> omittedChars = classifiedChars
-                        .stream()
-                        .filter(c -> c.classification == InputClassification.MISSING_CHAR).toList();
+                .stream()
+                .filter(c -> c.classification == InputClassification.MISSING_CHAR).toList();
         omittedChars.forEach(c -> c.classification = InputClassification.OMITTED_CHAR);
         missedChars = omittedChars.size();
-        System.out.println("Word : " + sourceWord + " wpm : " + getWPM());
-        System.out.println("Accuracy : " + getAccuracy());
     }
 
-    public BigDecimal getWPM(){
+    public BigDecimal getWPM() {
         if (finishTime == 0 || startTime == 0 || missedChars > 0)
             return BigDecimal.ZERO;
         return BigDecimal.valueOf(60000)
@@ -56,31 +62,31 @@ public class Word {
                 .setScale(2, RoundingMode.FLOOR);
     }
 
-    public double getAccuracy(){
-        return correctChars / (double) ( getInputChars() + missedChars);
+    public double getAccuracy() {
+        return correctChars / (double) (getInputChars() + missedChars);
     }
 
-    public int getInputChars(){
+    public int getInputChars() {
         return correctChars + incorrectChars + extraChars;
     }
 
-    public int getCorrectChars(){
+    public int getCorrectChars() {
         return correctChars;
     }
 
-    public int getIncorrectChars(){
+    public int getIncorrectChars() {
         return incorrectChars;
     }
 
-    public int getExtraChars(){
+    public int getExtraChars() {
         return extraChars;
     }
 
-    public int getMissedChars(){
+    public int getMissedChars() {
         return missedChars;
     }
 
-    public ClassifiedChar addChar(char c){
+    public ClassifiedChar addChar(char c) {
         ClassifiedChar classifiedChar;
         if (startTime == 0) {
             start();
@@ -88,9 +94,9 @@ public class Word {
 
         typedWord.add(c);
 
-        if (typedWord.size() <= sourceWord.length()){
+        if (typedWord.size() <= sourceWord.length()) {
             classifiedChar = classifiedChars.get(typedWord.size() - 1);
-            if (c == sourceWord.charAt(typedWord.size() - 1)){
+            if (c == sourceWord.charAt(typedWord.size() - 1)) {
                 classifiedChar.classification = InputClassification.CORRECT;
                 correctChars++;
             } else {
@@ -105,11 +111,11 @@ public class Word {
         return classifiedChar;
     }
 
-    public ClassifiedChar getLastChar(){
+    public ClassifiedChar getLastChar() {
         return classifiedChars.get(classifiedChars.size() - 1);
     }
 
-    public void removeLastChar(){
+    public void removeLastChar() {
         if (typedWord.size() > 0) {
             typedWord.remove(typedWord.size() - 1);
             if (typedWord.size() >= sourceWord.length()) {
@@ -120,19 +126,19 @@ public class Word {
         }
     }
 
-    public List<ClassifiedChar> getClassifiedChars(){
+    public List<ClassifiedChar> getClassifiedChars() {
         return classifiedChars;
     }
 
-    public long getTime(){
+    public long getTime() {
         return finishTime - startTime;
     }
 
-    public long getFinishTime(){
+    public long getFinishTime() {
         return finishTime;
     }
 
-    public String getSourceWord(){
+    public String getSourceWord() {
         return sourceWord;
     }
 

@@ -1,6 +1,7 @@
 package pl.edu.pja.s28687.typingapp;
 
 import org.junit.jupiter.api.Test;
+import pl.edu.pja.s28687.typingapp.controllers.LanguageController;
 
 import java.util.List;
 

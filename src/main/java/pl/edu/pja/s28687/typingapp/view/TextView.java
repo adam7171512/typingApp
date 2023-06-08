@@ -1,4 +1,4 @@
-package pl.edu.pja.s28687.typingapp;
+package pl.edu.pja.s28687.typingapp.view;
 
 import javafx.animation.*;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -7,22 +7,24 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.util.Pair;
+import pl.edu.pja.s28687.typingapp.controllers.WordController;
+import pl.edu.pja.s28687.typingapp.model.ClassifiedChar;
+import pl.edu.pja.s28687.typingapp.model.TestResult;
+import pl.edu.pja.s28687.typingapp.model.Word;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import static pl.edu.pja.s28687.typingapp.InputClassification.CORRECT;
+import static pl.edu.pja.s28687.typingapp.model.InputClassification.CORRECT;
 
 public class TextView {
 
@@ -49,20 +51,7 @@ public class TextView {
     }
 
     private void playWave() {
-//        List<Text> letters = words.stream().flatMap(w -> w.getChildren().stream().map(n -> (Text) n)).toList();
-//        ParallelTransition parallelTransition = new ParallelTransition();
-//        double delay = 0;
-//        for (int i = 0; i < letters.size(); i++) {
-//            TranslateTransition up = new TranslateTransition(Duration.millis(300), letters.get(i));
-//            up.setByY(-10);
-//            TranslateTransition down = new TranslateTransition(Duration.millis(300), letters.get(i));
-//            down.setByY(10);
-//            SequentialTransition sequentialTransition = new SequentialTransition(new PauseTransition(Duration.millis(delay)), up, down);
-//            parallelTransition.getChildren().add(sequentialTransition);
-//            delay += 100;
-//        }
-//        iterator = words.iterator();
-         waveThread = new Thread(new Runnable() {
+        waveThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 waveRunning = true;
@@ -90,8 +79,7 @@ public class TextView {
                         }
                         if (inGame) {
                             playWave();
-                        }
-                        else {
+                        } else {
                             waveRunning = false;
                         }
                     });
@@ -99,12 +87,6 @@ public class TextView {
             }
         });
         waveThread.start();
-
-//        parallelTransition.play();
-//        parallelTransition.setOnFinished(e -> {
-//            parallelTransition.stop();
-//            playWave();
-//        });
     }
 
     public void setWords(List<Word> words) {
@@ -124,7 +106,7 @@ public class TextView {
                 playWave();
         }
 
-        for (int i = 0; i < 2; i++){
+        for (int i = 0; i < 2; i++) {
             int wIndex = wordIndex - i;
             if (wIndex < 0) break;
             Word w = words.get(wIndex);
@@ -143,15 +125,15 @@ public class TextView {
 //        List<Text> currentWordChars = words.get(wordIndex).getClassifiedChars().stream().map(this::processClassifiedChar).toList();
 //        Text currentChar = (Text) currentWord.getChildren().get(charIndex);
         currentChar.setStyle(currentChar.getStyle() + "; -fx-underline: true");
-        if (charIndex == 0){
+        if (charIndex == 0) {
 
             return;
         }
         ClassifiedChar lastChar = words.get(wordIndex).getClassifiedChars().get(charIndex - 1);
-        if (lastChar.classification == CORRECT){
+        if (lastChar.classification == CORRECT) {
             jumpUp((Text) this.words.get(wordIndex).getChildren().get(charIndex - 1));
         }
-        if (words.get(wordIndex).getClassifiedChars().stream().allMatch(c -> c.classification == CORRECT)){
+        if (words.get(wordIndex).getClassifiedChars().stream().allMatch(c -> c.classification == CORRECT)) {
             correctWordAnimation(this.words.get(wordIndex));
         }
     }
@@ -164,12 +146,12 @@ public class TextView {
         up.play();
     }
 
-    private void correctWordAnimation(TextFlow word){
+    private void correctWordAnimation(TextFlow word) {
         wordAnimation(word, Color.MAGENTA, Color.GREEN);
     }
 
-    private void wordAnimation(TextFlow word, Color color1, Color color2){
-        for (Node letter : word.getChildren()){
+    private void wordAnimation(TextFlow word, Color color1, Color color2) {
+        for (Node letter : word.getChildren()) {
             Transition transition = new FillTransition(
                     Duration.millis(1000),
                     (Text) letter,
@@ -179,9 +161,9 @@ public class TextView {
         }
     }
 
-    private Text processClassifiedChar(ClassifiedChar c){
+    private Text processClassifiedChar(ClassifiedChar c) {
         Text text = new Text();
-        switch (c.classification){
+        switch (c.classification) {
             case CORRECT:
                 text.setStyle("-fx-fill: green");
                 break;
@@ -222,7 +204,7 @@ public class TextView {
         flowPane.getChildren().add(buildChartData);
     }
 
-    public void clear(){
+    public void clear() {
         inGame = false;
         flowPane.getChildren().clear();
         words.clear();

@@ -1,4 +1,4 @@
-package pl.edu.pja.s28687.typingapp;
+package pl.edu.pja.s28687.typingapp.model;
 
 public enum InputClassification {
     CORRECT,

@@ -1,10 +1,14 @@
-package pl.edu.pja.s28687.typingapp;
+package pl.edu.pja.s28687.typingapp.view;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import pl.edu.pja.s28687.typingapp.controllers.HotkeyController;
+import pl.edu.pja.s28687.typingapp.controllers.LanguageController;
+import pl.edu.pja.s28687.typingapp.controllers.TimeController;
+import pl.edu.pja.s28687.typingapp.controllers.WordController;
 
 public class GameView {
 
@@ -30,7 +34,6 @@ public class GameView {
 
     private void initialize() {
         root = new VBox();
-//        root.setAlignment(Pos.CENTER);
         root.setPrefHeight(1200);
         footer = new Footer();
         footer.setAlignment(Pos.BOTTOM_CENTER);
@@ -50,18 +53,13 @@ public class GameView {
         middlePane.getChildren().addAll(textView.getTextField(), textView.getFlowPane());
 
         footer.setAlignment(Pos.TOP_CENTER);
-        root.getChildren().addAll(header, middlePane, clockView,  footer);
+        root.getChildren().addAll(header, middlePane, clockView, footer);
 
-
-        // make something so that middlePane could get focus, some sort of listener..
         middlePane.setOnMouseClicked(e -> {
             textView.getTextField().requestFocus();
         });
         root.addEventFilter(KeyEvent.KEY_PRESSED, hotkeyController);
         root.addEventFilter(KeyEvent.KEY_RELEASED, hotkeyController);
-//        root.addEventHandler(KeyEvent.KEY_PRESSED, hotkeyController);
-//        root.addEventHandler(KeyEvent.KEY_RELEASED, hotkeyController);
-
     }
 
     public TextView getTextView() {
@@ -72,7 +70,7 @@ public class GameView {
         return root;
     }
 
-    public void updateTime(int timeLeft){
+    public void updateTime(int timeLeft) {
         ((Label) clockView.getChildren().get(0)).setText(timeLeft + "s");
     }
 

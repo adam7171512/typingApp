@@ -1,4 +1,4 @@
-package pl.edu.pja.s28687.typingapp;
+package pl.edu.pja.s28687.typingapp.controllers;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -8,8 +8,9 @@ import java.util.*;
 
 public class LanguageController implements ChangeListener<String> {
 
-    private static final String DICT_PATH ="dictionary/";
+    private static final String DICT_PATH = "dictionary/";
     private static final List<String> languages;
+    private static String currentLanguage = "english";
 
     static {
         languages = getTxtFilesFromDir(DICT_PATH).stream()
@@ -18,15 +19,7 @@ public class LanguageController implements ChangeListener<String> {
                 .toList();
     }
 
-    private static String currentLanguage = "english";
-
-    @Override
-    public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-        if (currentLanguage.equals(t1)) return;
-        currentLanguage = t1;
-    }
-
-    private static List<File> getTxtFilesFromDir(String path){
+    private static List<File> getTxtFilesFromDir(String path) {
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
         assert listOfFiles != null;
@@ -87,5 +80,11 @@ public class LanguageController implements ChangeListener<String> {
         }
         Collections.shuffle(words);
         return words;
+    }
+
+    @Override
+    public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+        if (currentLanguage.equals(t1)) return;
+        currentLanguage = t1;
     }
 }

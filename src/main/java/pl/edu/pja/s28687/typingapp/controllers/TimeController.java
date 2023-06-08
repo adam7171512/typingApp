@@ -1,16 +1,14 @@
-package pl.edu.pja.s28687.typingapp;
+package pl.edu.pja.s28687.typingapp.controllers;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import pl.edu.pja.s28687.typingapp.model.WordManager;
 
 public class TimeController implements ChangeListener<Integer>, InvalidationListener {
 
     private WordManager wordManager;
-
-    public TimeController() {
-    }
 
     public void setWordManager(WordManager wordManager) {
         this.wordManager = wordManager;
@@ -24,6 +22,5 @@ public class TimeController implements ChangeListener<Integer>, InvalidationList
 
     @Override
     public void invalidated(Observable observable) {
-
     }
 }
