@@ -37,6 +37,10 @@ public class App extends Application {
         VBox root = gameView.getRoot();
         primaryStage.setScene(new Scene(root, 1200, 1200));
         primaryStage.show();
+
+        primaryStage.setOnCloseRequest(e -> {
+            System.exit(0);
+        });
     }
 
     public void startApp() {

@@ -86,7 +86,7 @@ public class WordManager {
     private void notifyView() {
         view.setCurrentWordIndex(wordIndex);
         view.setCurrentCharIndex(charIndex);
-        view.setWords(currentWords);
+        view.setTextFlowWords(currentWords);
     }
 
     public ClassifiedChar addCharacter(char c) {
