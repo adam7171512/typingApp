@@ -101,9 +101,11 @@ public class TextView {
         inGame = true;
         // when new words are set (loaded)
         if (words.size() != this.textFlowWords.size()) {
+            this.flowPane.getChildren().clear();
             for (Word w : words) {
                 TextFlow textFlowWord = convertWordToTextFlow(w);
                 this.textFlowWords.add(textFlowWord);
+                this.flowPane.getChildren().add(textFlowWord);
             }
             iterator = this.textFlowWords.iterator();
             if (!waveRunning)
@@ -117,10 +119,11 @@ public class TextView {
             Word w = words.get(wIndex);
             TextFlow textFlowWord = convertWordToTextFlow(w);
             this.textFlowWords.set(wIndex, textFlowWord);
+            if (flowPane.getChildren().size() > wIndex) {
+                flowPane.getChildren().set(wIndex, textFlowWord);
+            }
         }
 
-        flowPane.getChildren().clear();
-        flowPane.getChildren().addAll(this.textFlowWords);
         Text currentChar = (Text) this.textFlowWords.get(wordIndex).getChildren().get(charIndex);
 
         currentChar.setStyle(currentChar.getStyle() + "; -fx-underline: true");
