@@ -37,10 +37,9 @@ public class TextView {
 
     private final TextField textField;
     private final FlowPane flowPane;
-    private final List<TextFlow> textFlowWords;
-    private int wordIndex;
-    private int charIndex;
-    private Iterator<TextFlow> iterator;
+    private int currentWordIndex;
+    private int currentCharIndex;
+    private Iterator<? super TextFlow> iterator;
     private boolean waveRunning = false;
     private boolean inGame = false;
 
@@ -52,7 +51,6 @@ public class TextView {
         this.textField.setPrefWidth(0);
         this.textField.setOpacity(0);
         this.textField.textProperty().addListener(wordController);
-        this.textFlowWords = new ArrayList<>();
         flowPane.setAlignment(Pos.CENTER);
     }
 
@@ -60,7 +58,7 @@ public class TextView {
         Thread waveThread = new Thread(() -> {
             waveRunning = true;
             if (inGame && iterator.hasNext()) {
-                TextFlow word = iterator.next();
+                TextFlow word = (TextFlow) iterator.next();
                 List<Text> chars = word.getChildren().stream().map(n -> (Text) n).toList();
                 ParallelTransition parallelTransition = new ParallelTransition();
                 double wordDelay = 0;
@@ -82,12 +80,12 @@ public class TextView {
                 parallelTransition.play();
                 parallelTransition.setOnFinished(e -> {
                     parallelTransition.stop();
-                    if (!iterator.hasNext()) {
-                        iterator = textFlowWords.iterator();
-                    }
-                    if (inGame) {
+                    List<Node> flowWords = this.flowPane.getChildren();
+                    if (inGame && !iterator.hasNext()) {
+                        iterator = flowWords.iterator();
                         playWave();
-                    } else {
+                    }
+                    else {
                         waveRunning = false;
                     }
                 });
@@ -99,45 +97,58 @@ public class TextView {
     public void setTextFlowWords(List<Word> words) {
         textField.requestFocus();
         inGame = true;
+
+        List<Node> flowWords = this.flowPane.getChildren();
+
         // when new words are set (loaded)
-        if (words.size() != this.textFlowWords.size()) {
-            this.flowPane.getChildren().clear();
+        if (flowWords.size() == 0) {
             for (Word w : words) {
                 TextFlow textFlowWord = convertWordToTextFlow(w);
-                this.textFlowWords.add(textFlowWord);
-                this.flowPane.getChildren().add(textFlowWord);
+                flowWords.add(textFlowWord);
             }
-            iterator = this.textFlowWords.iterator();
+            iterator = flowWords.iterator();
             if (!waveRunning)
                 playWave();
         }
 
         //updates last words
         for (int i = 0; i < 2; i++) {
-            int wIndex = wordIndex - i;
+            int wIndex = currentWordIndex - i;
             if (wIndex < 0) break;
             Word w = words.get(wIndex);
             TextFlow textFlowWord = convertWordToTextFlow(w);
-            this.textFlowWords.set(wIndex, textFlowWord);
-            if (flowPane.getChildren().size() > wIndex) {
-                flowPane.getChildren().set(wIndex, textFlowWord);
-            }
+            flowWords.set(wIndex, textFlowWord);
         }
 
-        Text currentChar = (Text) this.textFlowWords.get(wordIndex).getChildren().get(charIndex);
-
+        // underscore current char
+        Text currentChar =
+                (Text) ((TextFlow) flowWords
+                .get(currentWordIndex))
+                .getChildren()
+                .get(currentCharIndex);
         currentChar.setStyle(currentChar.getStyle() + "; -fx-underline: true");
-        if (charIndex == 0) {
+        if (currentCharIndex == 0) {
             return;
         }
 
         // jumping animation if character is correct and color animation if typed word is correct
-        ClassifiedChar lastChar = words.get(wordIndex).getClassifiedChars().get(charIndex - 1);
+        ClassifiedChar lastChar = words.get(currentWordIndex).getClassifiedChars().get(currentCharIndex - 1);
+        Text visibleLastChar =
+                (Text) ((TextFlow) flowWords
+                        .get(currentWordIndex))
+                        .getChildren()
+                        .get(currentCharIndex - 1);
+
         if (lastChar.classification == CORRECT) {
-            jumpUp((Text) this.textFlowWords.get(wordIndex).getChildren().get(charIndex - 1));
+            jumpUp(visibleLastChar);
         }
-        if (words.get(wordIndex).getClassifiedChars().stream().allMatch(c -> c.classification == CORRECT)) {
-            correctWordAnimation(this.textFlowWords.get(wordIndex));
+        if (
+                words.get(currentWordIndex)
+                        .getClassifiedChars()
+                        .stream()
+                        .allMatch(c -> c.classification == CORRECT)
+        ) {
+            correctWordAnimation((TextFlow) flowWords.get(currentWordIndex));
         }
     }
 
@@ -206,11 +217,11 @@ public class TextView {
     }
 
     public void setCurrentWordIndex(int wordIndex) {
-        this.wordIndex = wordIndex;
+        this.currentWordIndex = wordIndex;
     }
 
     public void setCurrentCharIndex(int charIndex) {
-        this.charIndex = charIndex;
+        this.currentCharIndex = charIndex;
     }
 
     public void sendChart(LineChart<Number, Number> buildChartData) {
@@ -220,10 +231,9 @@ public class TextView {
     public void clear() {
         inGame = false;
         flowPane.getChildren().clear();
-        textFlowWords.clear();
         textField.clear();
-        wordIndex = 0;
-        charIndex = 0;
+        currentWordIndex = 0;
+        currentCharIndex = 0;
     }
 
     public void testFinished(TestResult testResult) {
@@ -283,6 +293,6 @@ public class TextView {
     }
 
     public void newFeed() {
-        textFlowWords.clear();
+        flowPane.getChildren().clear();
     }
 }
