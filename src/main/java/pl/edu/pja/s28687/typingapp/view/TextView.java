@@ -81,8 +81,11 @@ public class TextView {
                 parallelTransition.setOnFinished(e -> {
                     parallelTransition.stop();
                     List<Node> flowWords = this.flowPane.getChildren();
-                    if (inGame && !iterator.hasNext()) {
+                    if (!iterator.hasNext()) {
                         iterator = flowWords.iterator();
+                    }
+                    if (inGame)
+                    {
                         playWave();
                     }
                     else {
@@ -108,7 +111,9 @@ public class TextView {
             }
             iterator = flowWords.iterator();
             if (!waveRunning)
+            {
                 playWave();
+            }
         }
 
         //updates last words
